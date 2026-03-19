@@ -255,24 +255,24 @@
 
       <div class="field">
         <label>Nombre completo <span class="req">*</span></label>
-        <input type="text" placeholder="Ej: Martín González" required />
+        <input type="text" name="nombre" placeholder="Ej: Martín González" required />
       </div>
 
       <div class="field">
         <label>Correo electrónico <span class="req">*</span></label>
-        <input type="email" placeholder="tu@email.com" required />
+        <input type="email" name="email" placeholder="tu@email.com" required />
       </div>
 
       <div class="field">
         <label>Empresa o marca</label>
-        <input type="text" placeholder="¿Con quién trabajás?" />
+        <input type="text" name="empresa" placeholder="¿Con quién trabajás?" />
       </div>
 
       <div class="divider"></div>
 
       <div class="field">
         <label>¿Qué servicio te interesa? <span class="req">*</span></label>
-        <select required>
+        <select name="servicio" required>
           <option value="" disabled selected>Seleccioná una opción</option>
           <option>Diseño web</option>
           <option>Automatizaciones</option>
@@ -286,19 +286,19 @@
         <label>¿Cuál es tu presupuesto aproximado?</label>
         <div class="radio-group">
           <label class="radio-option">
-            <input type="radio" name="budget" value="menos-500" />
+            <input type="radio" name="presupuesto" value="Menos de USD $500" />
             <span>Menos de USD $500</span>
           </label>
           <label class="radio-option">
-            <input type="radio" name="budget" value="500-1500" />
+            <input type="radio" name="presupuesto" value="USD $500 – $1.500" />
             <span>USD $500 – $1.500</span>
           </label>
           <label class="radio-option">
-            <input type="radio" name="budget" value="mas-1500" />
+            <input type="radio" name="presupuesto" value="Más de USD $1.500" />
             <span>Más de USD $1.500</span>
           </label>
           <label class="radio-option">
-            <input type="radio" name="budget" value="no-se" />
+            <input type="radio" name="presupuesto" value="Todavía no lo sé" />
             <span>Todavía no lo sé</span>
           </label>
         </div>
@@ -306,10 +306,10 @@
 
       <div class="field">
         <label>Contanos más sobre lo que necesitás</label>
-        <textarea placeholder="Describí brevemente tu proyecto o consulta..."></textarea>
+        <textarea name="mensaje" placeholder="Describí brevemente tu proyecto o consulta..."></textarea>
       </div>
 
-      <button type="submit" class="btn">Enviar consulta →</button>
+      <button type="submit" class="btn" id="btn-submit">Enviar consulta →</button>
 
       <p class="footer-note">Tu información es confidencial y no será compartida con terceros.</p>
 
@@ -324,8 +324,33 @@
   </div>
 
   <script>
-    document.getElementById('form').addEventListener('submit', function(e) {
+    const WEBHOOK_URL = 'https://TU-N8N-PUBLICO.com/webhook/formulario-contacto';
+
+    document.getElementById('form').addEventListener('submit', async function(e) {
       e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+
+      const data = {
+        nombre:     this.nombre.value,
+        email:      this.email.value,
+        empresa:    this.empresa.value,
+        servicio:   this.servicio.value,
+        presupuesto: this.presupuesto.value,
+        mensaje:    this.mensaje.value
+      };
+
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch (_) {
+        // Silencioso: igual mostramos éxito para UX
+      }
+
       document.getElementById('form').style.display = 'none';
       document.getElementById('success').style.display = 'block';
     });
