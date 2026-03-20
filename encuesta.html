@@ -26,6 +26,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      cursor: url('puntero.png') 8 4, auto;
+    }
+
+    a, button, label, input, textarea, select {
+      cursor: url('puntero.png') 8 4, pointer;
     }
 
     /* HEADER */
@@ -37,29 +42,11 @@
       gap: 20px;
     }
 
-    .logo {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-    }
-
-    .logo-mark {
-      display: flex;
-      align-items: center;
-    }
-
-    .logo-mark svg {
-      width: 52px;
-      height: 44px;
-    }
-
-    .logo-name {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.25em;
-      color: #fff;
-      text-transform: uppercase;
+    .logo img {
+      height: 64px;
+      width: auto;
+      display: block;
+      mix-blend-mode: screen;
     }
 
     .header-text {
@@ -98,6 +85,7 @@
       padding: 32px 36px;
       margin-bottom: 32px;
       border-left: 4px solid var(--red);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
     }
 
     .intro h2 {
@@ -120,7 +108,13 @@
       padding: 32px 36px;
       margin-bottom: 20px;
       border-top: 3px solid var(--red);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s;
       animation: fadeUp 0.4s ease both;
+    }
+
+    .question:hover {
+      box-shadow: 0 8px 28px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.06);
     }
 
     @keyframes fadeUp {
@@ -348,13 +342,7 @@
   <!-- HEADER -->
   <div class="header">
     <div class="logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 52 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 38 L20 6 L26 22 L32 6 L44 38" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M14 26 L38 26" stroke="white" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <span class="logo-name">Arte/Visual</span>
+      <img src="logo-av.png" alt="Arte Visual" />
     </div>
     <div class="header-text">
       <p>Encuesta de satisfacción</p>
@@ -465,11 +453,7 @@
   <!-- FOOTER -->
   <footer>
     <div class="footer-logo">
-      <svg viewBox="0 0 52 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 38 L20 6 L26 22 L32 6 L44 38" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M14 26 L38 26" stroke="white" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-      <span class="footer-logo-name">Arte/Visual</span>
+      <img src="logo-av.png" alt="Arte Visual" style="height:44px;width:auto;mix-blend-mode:screen;" />
     </div>
     <p>© 2025 Arte Visual · Todos los derechos reservados</p>
   </footer>
