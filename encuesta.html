@@ -2,167 +2,247 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>Encuesta de satisfacción · Arte Visual</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --red: #de0a14;
       --red-dark: #b8080f;
-      --red-light: rgba(222, 10, 20, 0.07);
-      --text: #1a1a1a;
-      --muted: #666;
-      --border: #e0e0e0;
-      --radius: 10px;
     }
 
-    body {
-      background: #f5f5f5;
-      color: var(--text);
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       font-family: 'Montserrat', sans-serif;
-      font-weight: 400;
-      min-height: 100vh;
+      background: #fff;
+    }
+
+    /* ── CONTENEDOR ── */
+    #slides {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── SLIDE BASE ── */
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-    }
-
-    /* HEADER */
-    .header {
-      background: var(--red);
-      padding: 36px 40px;
-      display: flex;
       align-items: center;
-      gap: 20px;
+      justify-content: center;
+      transform: translateY(100%);
+      transition: transform 0.75s cubic-bezier(0.77, 0, 0.175, 1);
+      overflow-y: auto;
     }
 
-    .logo img {
-      height: 88px;
+    .slide.active { transform: translateY(0); }
+    .slide.prev   { transform: translateY(-100%); }
+
+    /* ═══════════════════════════════
+       PORTADA
+    ═══════════════════════════════ */
+    .slide-cover {
+      background: var(--red);
+      padding: 48px 40px;
+      text-align: center;
+    }
+
+    .cover-logo {
+      height: 90px;
       width: auto;
+      margin-bottom: 52px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cover-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 18px;
+    }
+
+    .cover-title {
+      font-size: clamp(44px, 9vw, 88px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.0;
+      margin-bottom: 52px;
+    }
+
+    .cover-title em {
+      font-style: italic;
+      font-weight: 300;
       display: block;
     }
 
-    .header-text {
-      border-left: 1px solid rgba(255,255,255,0.3);
-      padding-left: 20px;
+    .cover-sub {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 52px;
+      line-height: 1.7;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .header-text p {
-      font-size: 12px;
-      font-weight: 600;
+    .btn-start {
+      background: #fff;
+      color: var(--red);
+      border: none;
+      border-radius: 100px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 4px;
+      padding: 18px 52px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
     }
 
-    .header-text h1 {
-      font-size: clamp(18px, 3vw, 24px);
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.2;
+    .btn-start:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.28);
     }
 
-    /* MAIN */
-    main {
-      flex: 1;
-      max-width: 720px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 48px 24px;
-    }
-
-    .intro {
+    /* ═══════════════════════════════
+       PREGUNTAS
+    ═══════════════════════════════ */
+    .slide-question {
       background: #fff;
-      border-radius: var(--radius);
-      padding: 32px 36px;
-      margin-bottom: 32px;
-      border-left: 4px solid var(--red);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+      justify-content: flex-start;
+      padding-top: 0;
     }
 
-    .intro h2 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--red);
-      margin-bottom: 10px;
-    }
-
-    .intro p {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    /* QUESTION CARD */
-    .question {
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 32px 36px;
-      margin-bottom: 20px;
-      border-top: 3px solid var(--red);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-      transition: box-shadow 0.2s;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .question:hover {
-      box-shadow: 0 8px 28px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.06);
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .question:nth-child(1) { animation-delay: 0.05s; }
-    .question:nth-child(2) { animation-delay: 0.10s; }
-    .question:nth-child(3) { animation-delay: 0.15s; }
-    .question:nth-child(4) { animation-delay: 0.20s; }
-    .question:nth-child(5) { animation-delay: 0.25s; }
-
-    .q-number {
-      display: inline-block;
+    /* Barra de progreso */
+    .progress {
+      position: absolute;
+      top: 0; left: 0;
+      height: 3px;
       background: var(--red);
-      color: #fff;
+      transition: width 0.6s ease;
+      z-index: 10;
+    }
+
+    /* Nav superior */
+    .q-nav {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 5;
+    }
+
+    .q-nav-logo {
+      height: 32px;
+      width: auto;
+    }
+
+    .q-counter {
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      padding: 3px 10px;
-      border-radius: 100px;
-      margin-bottom: 14px;
+      letter-spacing: 0.1em;
+      color: #ccc;
+    }
+
+    .q-counter strong {
+      color: var(--red);
+      font-size: 13px;
+    }
+
+    /* Número decorativo de fondo */
+    .q-deco {
+      position: absolute;
+      bottom: -30px;
+      right: -10px;
+      font-size: clamp(180px, 28vw, 300px);
+      font-weight: 900;
+      color: var(--red);
+      opacity: 0.045;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    /* Contenido de la pregunta */
+    .q-content {
+      width: 100%;
+      max-width: 660px;
+      padding: 100px 48px 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .q-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 18px;
     }
 
     .q-text {
-      font-size: 16px;
+      font-size: clamp(20px, 3.2vw, 28px);
       font-weight: 700;
-      color: var(--text);
-      line-height: 1.4;
-      margin-bottom: 20px;
+      color: #111;
+      line-height: 1.3;
+      margin-bottom: 36px;
     }
 
-    /* OPTIONS */
+    /* Opciones */
     .options {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      margin-bottom: 40px;
     }
 
     .option {
       display: flex;
       align-items: center;
-      gap: 14px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 18px;
+      gap: 16px;
+      border: 1.5px solid #ebebeb;
+      border-radius: 12px;
+      padding: 15px 20px;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
     }
 
     .option:hover {
       border-color: var(--red);
-      background: var(--red-light);
+      background: rgba(222,10,20,0.03);
+      transform: translateX(5px);
+    }
+
+    .option:has(input:checked) {
+      border-color: var(--red);
+      background: rgba(222,10,20,0.05);
+      transform: translateX(5px);
+    }
+
+    .option:has(input:checked) span {
+      color: var(--red);
+      font-weight: 700;
     }
 
     .option input[type="radio"] {
@@ -176,313 +256,354 @@
     .option span {
       font-size: 14px;
       font-weight: 500;
-      color: var(--text);
+      color: #333;
+      line-height: 1.4;
     }
 
-    .option:has(input:checked) {
-      border-color: var(--red);
-      background: var(--red-light);
+    /* Textarea */
+    .q-hint {
+      font-size: 12px;
+      color: #bbb;
+      margin-bottom: 12px;
+      font-style: italic;
     }
 
-    .option:has(input:checked) span {
-      color: var(--red);
-      font-weight: 600;
-    }
-
-    /* TEXTAREA */
     textarea {
       width: 100%;
       background: #fafafa;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
+      border: 1.5px solid #ebebeb;
+      border-radius: 12px;
+      color: #111;
       font-family: 'Montserrat', sans-serif;
       font-size: 14px;
       font-weight: 400;
-      padding: 14px 16px;
+      padding: 16px 20px;
       outline: none;
-      resize: vertical;
-      min-height: 120px;
-      line-height: 1.6;
+      resize: none;
+      height: 150px;
+      line-height: 1.7;
       transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 32px;
+      display: block;
     }
-
-    textarea::placeholder { color: #aaa; }
 
     textarea:focus {
       border-color: var(--red);
       background: #fff;
     }
 
-    .q-hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 12px;
-      font-style: italic;
-    }
+    textarea::placeholder { color: #ccc; }
 
-    /* SUBMIT */
-    .submit-wrap {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 12px;
-    }
-
-    .btn {
+    /* Botón siguiente */
+    .btn-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       background: var(--red);
       color: #fff;
       border: none;
-      border-radius: var(--radius);
+      border-radius: 100px;
       font-family: 'Montserrat', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       padding: 16px 40px;
       cursor: pointer;
-      letter-spacing: 0.03em;
-      transition: background 0.2s, transform 0.15s;
-      text-transform: uppercase;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(222,10,20,0.25);
     }
 
-    .btn:hover { background: var(--red-dark); transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-
-    /* SUCCESS */
-    .success {
-      display: none;
-      text-align: center;
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 64px 36px;
-      border-top: 4px solid var(--red);
+    .btn-next:hover {
+      background: var(--red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(222,10,20,0.35);
     }
 
-    .success-icon {
-      width: 64px;
-      height: 64px;
+    .btn-next:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Shake animation */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    .shake { animation: shake 0.35s ease; }
+
+    /* ═══════════════════════════════
+       PANTALLA DE ÉXITO
+    ═══════════════════════════════ */
+    .slide-success {
       background: var(--red);
+      padding: 48px 40px;
+      text-align: center;
+    }
+
+    .success-check {
+      width: 76px;
+      height: 76px;
+      border: 2px solid rgba(255,255,255,0.4);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 24px;
+      margin: 0 auto 36px;
     }
 
-    .success-icon svg {
-      width: 32px;
-      height: 32px;
+    .success-check svg { width: 34px; height: 34px; }
+
+    .success-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 20px;
     }
 
-    .success h2 {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--red);
-      margin-bottom: 12px;
+    .success-title {
+      font-size: clamp(30px, 6vw, 56px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.05;
+      margin-bottom: 28px;
     }
 
-    .success p {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.7;
-      max-width: 360px;
+    .success-title em {
+      font-style: italic;
+      font-weight: 300;
+      display: block;
+    }
+
+    .success-text {
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.85;
+      max-width: 480px;
       margin: 0 auto;
     }
 
-    /* FOOTER */
-    footer {
-      background: var(--red);
-      padding: 28px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .footer-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .footer-logo svg {
-      width: 36px;
-      height: 30px;
-    }
-
-    .footer-logo-name {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.25em;
-      color: rgba(255,255,255,0.8);
-      text-transform: uppercase;
-    }
-
-    footer p {
-      font-size: 12px;
-      color: rgba(255,255,255,0.6);
-      font-weight: 500;
-    }
-
+    /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
-      .header { padding: 20px 16px; gap: 14px; }
-      .logo img { height: 48px; }
-      .header-text h1 { font-size: 18px; }
-      .intro, .question { padding: 20px 16px; }
-      .q-text { font-size: 15px; }
-      main { padding: 20px 12px; }
-      .btn { width: 100%; text-align: center; }
-      .submit-wrap { justify-content: stretch; }
-      footer { padding: 20px 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+      .q-nav { padding: 16px 20px; }
+      .q-content { padding: 82px 24px 32px; }
+      .q-text { font-size: 19px; }
+      .q-deco { font-size: 160px; }
+      .cover-title { font-size: 44px; }
+      .cover-logo { height: 64px; margin-bottom: 36px; }
+      .slide-cover, .slide-success { padding: 40px 24px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo">
-      <img src="logo-av.png" alt="Arte Visual" />
+<div id="slides">
+
+  <!-- ── PORTADA ── -->
+  <div class="slide slide-cover active" id="slide-0">
+    <img src="logo-av.png" alt="Arte Visual" class="cover-logo" />
+    <p class="cover-label">Encuesta de satisfacción</p>
+    <h1 class="cover-title">Tu opinión<em>nos importa.</em></h1>
+    <p class="cover-sub">5 preguntas. Menos de 3 minutos.<br>Tu mirada hace la diferencia.</p>
+    <button class="btn-start" onclick="goTo(1)">Comenzar &rarr;</button>
+  </div>
+
+  <!-- ── PREGUNTA 01 ── -->
+  <div class="slide slide-question" id="slide-1">
+    <div class="progress" style="width:20%"></div>
+    <div class="q-nav">
+      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
+      <span class="q-counter"><strong>01</strong> / 05</span>
     </div>
-    <div class="header-text">
-      <p>Encuesta de satisfacción</p>
-      <h1>Tu opinión nos<br>importa</h1>
+    <div class="q-deco">01</div>
+    <div class="q-content">
+      <span class="q-tag">Pregunta 01</span>
+      <p class="q-text">¿Cómo describirías tu experiencia general con el servicio de gestión de redes sociales?</p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="p1" value="Excelente" />
+          <span>Excelente</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="p1" value="Muy buena" />
+          <span>Muy buena</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="p1" value="Satisfactoria" />
+          <span>Satisfactoria</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="p1" value="Deficiente" />
+          <span>Deficiente</span>
+        </label>
+      </div>
+      <button class="btn-next" id="btn-1" onclick="nextRadio(1, 'p1')">Siguiente &rarr;</button>
     </div>
   </div>
 
-  <!-- MAIN -->
-  <main>
-
-    <form id="form">
-
-      <!-- P1 -->
-      <div class="question">
-        <span class="q-number">Pregunta 01</span>
-        <p class="q-text">¿Cómo describirías tu experiencia general con el servicio de gestión de redes sociales?</p>
-        <div class="options">
-          <label class="option">
-            <input type="radio" name="p1" value="Excelente" required />
-            <span>Excelente</span>
-          </label>
-          <label class="option">
-            <input type="radio" name="p1" value="Muy buena" />
-            <span>Muy buena</span>
-          </label>
-          <label class="option">
-            <input type="radio" name="p1" value="Satisfactoria" />
-            <span>Satisfactoria</span>
-          </label>
-          <label class="option">
-            <input type="radio" name="p1" value="Deficiente" />
-            <span>Deficiente</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- P2 -->
-      <div class="question">
-        <span class="q-number">Pregunta 02</span>
-        <p class="q-text">¿Qué es lo que más valorás del trabajo que realizamos en redes?</p>
-        <p class="q-hint">Respuesta abierta — escribí lo que quieras</p>
-        <textarea name="p2" placeholder="Contanos con tus palabras..."></textarea>
-      </div>
-
-      <!-- P3 -->
-      <div class="question">
-        <span class="q-number">Pregunta 03</span>
-        <p class="q-text">En relación a los procesos de trabajo (planificación, contenidos, publicaciones), ¿cómo te sentís hoy?</p>
-        <div class="options">
-          <label class="option">
-            <input type="radio" name="p3" value="Muy al tanto y conforme" required />
-            <span>Muy al tanto y conforme</span>
-          </label>
-          <label class="option">
-            <input type="radio" name="p3" value="Bien, aunque me gustaría entender más el proceso" />
-            <span>Bien, aunque me gustaría entender un poco más el proceso</span>
-          </label>
-          <label class="option">
-            <input type="radio" name="p3" value="Prefiero que esté optimizado sin involucrarme demasiado" />
-            <span>Prefiero que esté optimizado y no involucrarme demasiado</span>
-          </label>
-          <label class="option">
-            <input type="radio" name="p3" value="Siento que podría estar mejor informado/a" />
-            <span>Siento que podría estar mejor informado/a</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- P4 -->
-      <div class="question">
-        <span class="q-number">Pregunta 04</span>
-        <p class="q-text">¿Hay algo del servicio que te gustaría mejorar o ajustar?</p>
-        <p class="q-hint">Respuesta abierta — toda devolución es bienvenida</p>
-        <textarea name="p4" placeholder="Tu feedback es muy valioso para nosotros..."></textarea>
-      </div>
-
-      <!-- P5 -->
-      <div class="question">
-        <span class="q-number">Pregunta 05</span>
-        <p class="q-text">Pensando a futuro, ¿qué te gustaría que el servicio de redes te aporte?</p>
-        <p class="q-hint">Respuesta abierta — contanos tus expectativas</p>
-        <textarea name="p5" placeholder="¿Qué objetivos o resultados esperás conseguir?"></textarea>
-      </div>
-
-      <div class="submit-wrap">
-        <button type="submit" class="btn" id="btn-submit">Enviar respuestas →</button>
-      </div>
-
-    </form>
-
-    <div class="success" id="success">
-      <div class="success-icon">
-        <svg viewBox="0 0 32 32" fill="none">
-          <path d="M6 16 L13 23 L26 9" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <h2>Gracias por tomarte el tiempo.</h2>
-      <p>Valoramos mucho tu devolución y la vamos a tener en cuenta para seguir ajustando nuestro trabajo y acompañarte cada vez mejor.<br><br>En Arte Visual creemos en los procesos que evolucionan junto a cada cliente.<br><br>Seguimos en contacto.</p>
+  <!-- ── PREGUNTA 02 ── -->
+  <div class="slide slide-question" id="slide-2">
+    <div class="progress" style="width:40%"></div>
+    <div class="q-nav">
+      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
+      <span class="q-counter"><strong>02</strong> / 05</span>
     </div>
-
-  </main>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-logo">
-      <img src="logo-av.png" alt="Arte Visual" style="height:60px;width:auto;" />
+    <div class="q-deco">02</div>
+    <div class="q-content">
+      <span class="q-tag">Pregunta 02</span>
+      <p class="q-text">¿Qué es lo que más valorás del trabajo que realizamos en redes?</p>
+      <p class="q-hint">Respuesta libre — escribí lo que quieras</p>
+      <textarea id="p2" placeholder="Contanos con tus palabras..."></textarea>
+      <button class="btn-next" onclick="nextText(2, 'p2')">Siguiente &rarr;</button>
     </div>
-    <p>© 2025 Arte Visual · Todos los derechos reservados</p>
-  </footer>
+  </div>
 
-  <script>
-    const WEBHOOK_URL = 'https://3a4d-190-106-84-7.ngrok-free.app/webhook/M4B5DyvY44zTa7aO/webhook/encuesta-artevisual';
+  <!-- ── PREGUNTA 03 ── -->
+  <div class="slide slide-question" id="slide-3">
+    <div class="progress" style="width:60%"></div>
+    <div class="q-nav">
+      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
+      <span class="q-counter"><strong>03</strong> / 05</span>
+    </div>
+    <div class="q-deco">03</div>
+    <div class="q-content">
+      <span class="q-tag">Pregunta 03</span>
+      <p class="q-text">En relación a los procesos de trabajo, ¿cómo te sentís hoy?</p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="p3" value="Muy al tanto y conforme" />
+          <span>Muy al tanto y conforme</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="p3" value="Bien, aunque me gustaría entender más el proceso" />
+          <span>Bien, aunque me gustaría entender más el proceso</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="p3" value="Prefiero que esté optimizado sin involucrarme demasiado" />
+          <span>Prefiero que esté optimizado y no involucrarme</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="p3" value="Siento que podría estar mejor informado/a" />
+          <span>Siento que podría estar mejor informado/a</span>
+        </label>
+      </div>
+      <button class="btn-next" id="btn-3" onclick="nextRadio(3, 'p3')">Siguiente &rarr;</button>
+    </div>
+  </div>
 
-    document.getElementById('form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-submit');
-      btn.textContent = 'Enviando...';
-      btn.disabled = true;
+  <!-- ── PREGUNTA 04 ── -->
+  <div class="slide slide-question" id="slide-4">
+    <div class="progress" style="width:80%"></div>
+    <div class="q-nav">
+      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
+      <span class="q-counter"><strong>04</strong> / 05</span>
+    </div>
+    <div class="q-deco">04</div>
+    <div class="q-content">
+      <span class="q-tag">Pregunta 04</span>
+      <p class="q-text">¿Hay algo del servicio que te gustaría mejorar o ajustar?</p>
+      <p class="q-hint">Respuesta libre — toda devolución es bienvenida</p>
+      <textarea id="p4" placeholder="Tu feedback es muy valioso para nosotros..."></textarea>
+      <button class="btn-next" onclick="nextText(4, 'p4')">Siguiente &rarr;</button>
+    </div>
+  </div>
 
-      const data = {
-        p1: this.p1 ? this.p1.value : '',
-        p2: this.p2 ? this.p2.value : '',
-        p3: this.p3 ? this.p3.value : '',
-        p4: this.p4 ? this.p4.value : '',
-        p5: this.p5 ? this.p5.value : ''
-      };
+  <!-- ── PREGUNTA 05 ── -->
+  <div class="slide slide-question" id="slide-5">
+    <div class="progress" style="width:100%"></div>
+    <div class="q-nav">
+      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
+      <span class="q-counter"><strong>05</strong> / 05</span>
+    </div>
+    <div class="q-deco">05</div>
+    <div class="q-content">
+      <span class="q-tag">Pregunta 05</span>
+      <p class="q-text">Pensando a futuro, ¿qué te gustaría que el servicio de redes te aporte?</p>
+      <p class="q-hint">Respuesta libre — contanos tus expectativas</p>
+      <textarea id="p5" placeholder="¿Qué objetivos o resultados esperás conseguir?"></textarea>
+      <button class="btn-next" id="btn-submit" onclick="submitForm()">Enviar respuestas &rarr;</button>
+    </div>
+  </div>
 
-      try {
-        await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-      } catch (err) {
-        console.error('Webhook error:', err);
-      }
+  <!-- ── ÉXITO ── -->
+  <div class="slide slide-success" id="slide-6">
+    <div class="success-check">
+      <svg viewBox="0 0 34 34" fill="none">
+        <path d="M7 17 L14 24 L27 10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <p class="success-label">Respuesta enviada</p>
+    <h2 class="success-title">Gracias por<em>tomarte el tiempo.</em></h2>
+    <p class="success-text">
+      Valoramos mucho tu devolución y la vamos a tener en cuenta para seguir ajustando nuestro trabajo y acompañarte cada vez mejor.<br><br>
+      En Arte Visual creemos en los procesos que evolucionan junto a cada cliente.<br><br>
+      Seguimos en contacto.
+    </p>
+  </div>
 
-      document.getElementById('form').style.display = 'none';
-      document.getElementById('success').style.display = 'block';
-    });
-  </script>
+</div>
+
+<script>
+  const WEBHOOK_URL = 'https://3a4d-190-106-84-7.ngrok-free.app/webhook/M4B5DyvY44zTa7aO/webhook/encuesta-artevisual';
+
+  let current = 0;
+  const answers = {};
+
+  function goTo(index) {
+    const allSlides = document.querySelectorAll('.slide');
+    allSlides[current].classList.remove('active');
+    allSlides[current].classList.add('prev');
+    allSlides[index].classList.add('active');
+    current = index;
+  }
+
+  function nextRadio(slideNum, name) {
+    const selected = document.querySelector(`input[name="${name}"]:checked`);
+    if (!selected) {
+      const btn = document.getElementById(`btn-${slideNum}`);
+      btn.classList.remove('shake');
+      void btn.offsetWidth;
+      btn.classList.add('shake');
+      return;
+    }
+    answers[`p${slideNum}`] = selected.value;
+    goTo(slideNum + 1);
+  }
+
+  function nextText(slideNum, id) {
+    const val = document.getElementById(id).value;
+    answers[`p${slideNum}`] = val;
+    goTo(slideNum + 1);
+  }
+
+  async function submitForm() {
+    answers['p5'] = document.getElementById('p5').value;
+
+    const btn = document.getElementById('btn-submit');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(answers)
+      });
+    } catch (err) {
+      console.error(err);
+    }
+
+    goTo(6);
+  }
+</script>
 
 </body>
 </html>
