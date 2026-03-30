@@ -1,609 +1,700 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Encuesta de satisfacción · Arte Visual</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Encuesta · Arte Visual</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&display=swap"
+    rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --red: #de0a14;
-      --red-dark: #b8080f;
-    }
+    :root { --red: #de0a14; --red-dark: #b8080f; }
 
     html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Montserrat', sans-serif;
-      background: #fff;
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: 'Montserrat', sans-serif; background: #0e0e0e;
     }
 
-    /* ── CONTENEDOR ── */
-    #slides {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
+    /* ══════════════════════════════════
+       VELO NEGRO
+    ══════════════════════════════════ */
+    #veil {
+      position: fixed; inset: 0; background: #000; z-index: 30;
+      opacity: 0; pointer-events: none; transition: opacity 2.5s ease;
     }
+    #veil.active { opacity: 1; pointer-events: all; }
+    #veil.gone   { opacity: 0; pointer-events: none; }
 
-    /* ── SLIDE BASE ── */
-    .slide {
+    /* ══════════════════════════════════
+       VIDEO 1: presentación
+    ══════════════════════════════════ */
+    #cover1 { position: fixed; inset: 0; z-index: 25; background: #000; }
+    #cover1 video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    #cover1.gone  { display: none; }
+
+    /* ══════════════════════════════════
+       INTRO: texto + botón
+    ══════════════════════════════════ */
+    #intro {
+      position: fixed; inset: 0; z-index: 22;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 1.4s ease;
+    }
+    #intro.visible { opacity: 1; pointer-events: all; }
+    #intro.gone    { opacity: 0; pointer-events: none; }
+
+    .intro-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.32em;
+      text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 20px;
+    }
+    .intro-title {
+      font-size: clamp(32px, 5vw, 62px); font-weight: 900;
+      color: #fff; line-height: 1.0; text-align: center; margin-bottom: 10px;
+    }
+    .intro-title em { display: block; font-style: italic; font-weight: 300; color: rgba(255,255,255,0.45); }
+    .intro-line { width: 40px; height: 1px; background: var(--red); margin: 28px auto; }
+    .btn-intro {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.25);
+      font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 800;
+      letter-spacing: 0.24em; text-transform: uppercase; padding: 15px 40px;
+      cursor: pointer; transition: border-color 0.25s, background 0.25s, transform 0.2s; border-radius: 1px;
+    }
+    .btn-intro:hover { border-color: var(--red); background: rgba(222,10,20,0.08); transform: translateY(-2px); }
+
+    /* ══════════════════════════════════
+       LAYERS DE VIDEO (todos comparten fade-out)
+    ══════════════════════════════════ */
+    .vid-layer {
+      position: fixed; inset: 0; background: #000; display: none; overflow: hidden;
+    }
+    .vid-layer video {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    }
+    .vid-layer.fade-out { animation: videoFadeOut 1.0s ease forwards; }
+    @keyframes videoFadeOut { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+    #cover-video  { z-index: 24; }
+    #cover-video2 { z-index: 23; }
+    /* clip1 y clip2 van detrás del overlay de preguntas pero sobre el fondo */
+    #cover-clip1  { z-index: 15; }
+    #cover-clip2  { z-index: 15; }
+
+    /* ══════════════════════════════════
+       OVERLAY DE PREGUNTAS (sobre el video)
+    ══════════════════════════════════ */
+    #tw-scene {
+      position: fixed; inset: 0; z-index: 20;
+      display: none;
+      pointer-events: none;   /* el container interno activa los eventos */
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    #tw-scene.visible { opacity: 1; }
+
+    /* Contenedor posicionado sobre la página blanca */
+    #tw-container {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transform: translateY(100%);
-      transition: transform 0.75s cubic-bezier(0.77, 0, 0.175, 1);
+      display: flex; flex-direction: column;
+      pointer-events: all;
+      transition: opacity 0.28s ease;
       overflow-y: auto;
     }
 
-    .slide.active { transform: translateY(0); }
-    .slide.prev   { transform: translateY(-100%); }
-
-    /* ═══════════════════════════════
-       PORTADA
-    ═══════════════════════════════ */
-    .slide-cover {
-      background: var(--red);
-      padding: 48px 40px;
-      text-align: center;
+    /* ── Q1: página derecha (hoja única, clip1) ── */
+    #tw-container.pos-right-single {
+      left: 53%; right: 22%;
+      top: 18%; bottom: 4%;
     }
 
-    .cover-logo {
-      height: 90px;
-      width: auto;
-      margin-bottom: 52px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+    /* ── Q2: página izquierda (doble hoja, clip2) ── */
+    #tw-container.pos-left-double {
+      left: 18%; right: 52%;
+      top: 19%; bottom: 4%;
     }
 
-    .cover-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
-      margin-bottom: 18px;
+    /* ── Q3/Q4/Q5: página derecha (doble hoja, clip2) ── */
+    #tw-container.pos-right-double {
+      left: 53%; right: 22%;
+      top: 18%; bottom: 4%;
     }
 
-    .cover-title {
-      font-size: clamp(44px, 9vw, 88px);
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.0;
-      margin-bottom: 52px;
+    /* ── Q4, Q5: página derecha (hoja única, clip1) ── */
+    #tw-container.pos-right-single-b {
+      left: 53%; right: 22%;
+      top: 18%; bottom: 4%;
     }
 
-    .cover-title em {
-      font-style: italic;
-      font-weight: 300;
-      display: block;
+    #tw-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: clamp(16px, 3vh, 32px);
+    }
+    .tw-logo { height: 18px; width: auto; opacity: 0.5; }
+    #tw-qnum { font-size: 9px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: #aaa; }
+
+    /* La pregunta — tinta sobre papel */
+    #tw-question {
+      font-size: clamp(16px, 2.2vw, 26px);
+      font-weight: 700; color: #2a2a2a; line-height: 1.38;
+      margin-bottom: 24px; min-height: 1.5em;
+      opacity: 0.82;
     }
 
-    .cover-sub {
-      font-size: 14px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 52px;
-      line-height: 1.7;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
+    /* Cursor parpadeante rojo */
+    .tw-cursor {
+      display: inline-block; width: 2.5px; height: 1.05em;
+      background: var(--red); margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 0.65s step-end infinite;
     }
-
-    .btn-start {
-      background: #fff;
-      color: var(--red);
-      border: none;
-      border-radius: 100px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 18px 52px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    }
-
-    .btn-start:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.28);
-    }
-
-    /* ═══════════════════════════════
-       PREGUNTAS
-    ═══════════════════════════════ */
-    .slide-question {
-      background: #fff;
-      justify-content: flex-start;
-      padding-top: 0;
-    }
-
-    /* Barra de progreso */
-    .progress {
-      position: absolute;
-      top: 0; left: 0;
-      height: 3px;
-      background: var(--red);
-      transition: width 0.6s ease;
-      z-index: 10;
-    }
-
-    /* Nav superior */
-    .q-nav {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      padding: 20px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 5;
-    }
-
-    .q-nav-logo {
-      height: 32px;
-      width: auto;
-    }
-
-    .q-counter {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: #ccc;
-    }
-
-    .q-counter strong {
-      color: var(--red);
-      font-size: 13px;
-    }
-
-    /* Número decorativo de fondo */
-    .q-deco {
-      position: absolute;
-      bottom: -30px;
-      right: -10px;
-      font-size: clamp(180px, 28vw, 300px);
-      font-weight: 900;
-      color: var(--red);
-      opacity: 0.045;
-      line-height: 1;
-      pointer-events: none;
-      user-select: none;
-      z-index: 0;
-    }
-
-    /* Contenido de la pregunta */
-    .q-content {
-      width: 100%;
-      max-width: 660px;
-      padding: 100px 48px 48px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .q-tag {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--red);
-      margin-bottom: 18px;
-    }
-
-    .q-text {
-      font-size: clamp(20px, 3.2vw, 28px);
-      font-weight: 700;
-      color: #111;
-      line-height: 1.3;
-      margin-bottom: 36px;
-    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
     /* Opciones */
-    .options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 40px;
+    #tw-options {
+      display: flex; flex-direction: column; gap: 8px;
+      opacity: 0; transition: opacity 0.5s ease;
     }
+    #tw-options.visible { opacity: 1; }
 
-    .option {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      border: 1.5px solid #ebebeb;
-      border-radius: 12px;
-      padding: 15px 20px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    .tw-option {
+      display: flex; align-items: center; gap: 12px;
+      background: transparent;
+      border: 1.5px solid #3a3a3a;
+      border-radius: 5px; padding: 10px 14px; cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.15s;
     }
+    .tw-option:hover { border-color: var(--red); background: rgba(222,10,20,0.04); transform: translateX(3px); }
+    .tw-option:has(input:checked) { border-color: var(--red); background: rgba(222,10,20,0.06); transform: translateX(3px); }
+    .tw-option:has(input:checked) span { color: var(--red); font-weight: 700; }
+    .tw-option input[type="radio"] { width: 14px; height: 14px; min-width: 14px; accent-color: var(--red); cursor: pointer; }
+    .tw-option span { font-size: 12px; font-weight: 500; color: #3a3a3a; }
 
-    .option:hover {
-      border-color: var(--red);
-      background: rgba(222,10,20,0.03);
-      transform: translateX(5px);
-    }
-
-    .option:has(input:checked) {
-      border-color: var(--red);
-      background: rgba(222,10,20,0.05);
-      transform: translateX(5px);
-    }
-
-    .option:has(input:checked) span {
-      color: var(--red);
-      font-weight: 700;
-    }
-
-    .option input[type="radio"] {
-      width: 18px;
-      height: 18px;
-      min-width: 18px;
-      accent-color: var(--red);
-      cursor: pointer;
-    }
-
-    .option span {
-      font-size: 14px;
-      font-weight: 500;
-      color: #333;
-      line-height: 1.4;
-    }
+    /* Hint */
+    #tw-hint { font-size: 11px; color: #aaa; font-style: italic; margin-bottom: 10px; opacity: 0; transition: opacity 0.5s ease; }
+    #tw-hint.visible { opacity: 1; }
 
     /* Textarea */
-    .q-hint {
-      font-size: 12px;
-      color: #bbb;
-      margin-bottom: 12px;
-      font-style: italic;
+    #tw-textarea {
+      display: none; width: 100%;
+      background: #f7f7f7;
+      border: 1.5px solid #e0e0e0; border-radius: 5px;
+      color: #3a3a3a; font-family: 'Montserrat', sans-serif;
+      font-size: 12px; padding: 11px 14px;
+      outline: none; resize: none; height: 110px; line-height: 1.6;
+      opacity: 0; transition: opacity 0.5s ease, border-color 0.2s, background 0.2s;
     }
+    #tw-textarea.visible { opacity: 1; }
+    #tw-textarea:focus     { border-color: var(--red); background: #fff; }
+    #tw-textarea::placeholder { color: #bbb; }
 
-    textarea {
-      width: 100%;
-      background: #fafafa;
-      border: 1.5px solid #ebebeb;
-      border-radius: 12px;
-      color: #111;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 14px;
-      font-weight: 400;
-      padding: 16px 20px;
-      outline: none;
-      resize: none;
-      height: 150px;
-      line-height: 1.7;
-      transition: border-color 0.2s, background 0.2s;
-      margin-bottom: 32px;
-      display: block;
+    /* Barra inferior */
+    #tw-bottom {
+      margin-top: 20px; padding-top: 0;
+      display: flex; align-items: center; justify-content: flex-start; gap: 20px;
+      opacity: 0; transition: opacity 0.5s ease;
     }
+    #tw-bottom.visible { opacity: 1; }
+    #tw-pnum { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; color: #bbb; }
 
-    textarea:focus {
-      border-color: var(--red);
-      background: #fff;
-    }
-
-    textarea::placeholder { color: #ccc; }
-
-    /* Botón siguiente */
     .btn-next {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--red);
-      color: #fff;
-      border: none;
-      border-radius: 100px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 16px 40px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(222,10,20,0.25);
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #111; color: #fff; border: none; border-radius: 2px;
+      font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 800;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 10px 22px; cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
     }
+    .btn-next:hover    { background: var(--red); transform: translateX(4px); }
+    .btn-next:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
 
-    .btn-next:hover {
-      background: var(--red-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(222,10,20,0.35);
-    }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    .shake { animation: shake 0.3s ease; }
 
-    .btn-next:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Shake animation */
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      20% { transform: translateX(-6px); }
-      40% { transform: translateX(6px); }
-      60% { transform: translateX(-4px); }
-      80% { transform: translateX(4px); }
-    }
-
-    .shake { animation: shake 0.35s ease; }
-
-    /* ═══════════════════════════════
+    /* ══════════════════════════════════
        PANTALLA DE ÉXITO
-    ═══════════════════════════════ */
-    .slide-success {
+    ══════════════════════════════════ */
+    #tw-success {
+      position: fixed; inset: 0; z-index: 21;
       background: var(--red);
-      padding: 48px 40px;
-      text-align: center;
+      display: none; flex-direction: column;
+      align-items: flex-start; justify-content: center;
+      padding: clamp(32px, 5vw, 80px) clamp(28px, 9vw, 130px);
+      opacity: 0; transition: opacity 0.8s ease;
+    }
+    #tw-success.showing { display: flex; }
+    #tw-success.visible { opacity: 1; }
+    .s-check { width: 54px; height: 54px; border: 1.5px solid rgba(255,255,255,0.35); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 28px; }
+    .s-check svg { width: 22px; height: 22px; }
+    .s-label  { font-size: 9px; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
+    .s-title  { font-size: clamp(24px, 3.5vw, 40px); font-weight: 900; color: #fff; line-height: 1.0; margin-bottom: 18px; }
+    .s-title em { display: block; font-style: italic; font-weight: 300; }
+    .s-text   { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.85; max-width: 380px; }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 768px) {
+      /* En móvil: solo se ve la hoja derecha — posicionar sobre ella */
+      #tw-container.pos-right-single,
+      #tw-container.pos-right-single-b,
+      #tw-container.pos-left-double,
+      #tw-container.pos-right-double {
+        left: 52%; right: 5%;
+        top: 18%; bottom: 5%;
+      }
+      #tw-question  { font-size: 18px; margin-bottom: 18px; }
+      #tw-options   { gap: 8px; }
+      .tw-option    { padding: 10px 13px; }
+      .tw-option span { font-size: 12px; line-height: 1.4; }
+      #tw-textarea  { height: 100px; font-size: 13px; }
+      #tw-bottom    { flex-direction: row; gap: 12px; align-items: center; }
+      .btn-next     { padding: 11px 22px; }
+      .btn-intro    { padding: 12px 24px; font-size: 9px; }
+      #tw-header    { margin-bottom: 20px; }
+      .tw-logo      { height: 16px; }
+      #tw-qnum      { font-size: 8px; }
     }
 
-    .success-check {
-      width: 76px;
-      height: 76px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 36px;
-    }
-
-    .success-check svg { width: 34px; height: 34px; }
-
-    .success-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 20px;
-    }
-
-    .success-title {
-      font-size: clamp(30px, 6vw, 56px);
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.05;
-      margin-bottom: 28px;
-    }
-
-    .success-title em {
-      font-style: italic;
-      font-weight: 300;
-      display: block;
-    }
-
-    .success-text {
-      font-size: 15px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.65);
-      line-height: 1.85;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
-      .q-nav { padding: 16px 20px; }
-      .q-content { padding: 82px 24px 32px; }
-      .q-text { font-size: 19px; }
-      .q-deco { font-size: 160px; }
-      .cover-title { font-size: 44px; }
-      .cover-logo { height: 64px; margin-bottom: 36px; }
-      .slide-cover, .slide-success { padding: 40px 24px; }
+    @media (max-width: 480px) {
+      #tw-container.pos-right-single,
+      #tw-container.pos-right-single-b,
+      #tw-container.pos-left-double,
+      #tw-container.pos-right-double {
+        left: 54%; right: 4%;
+        top: 16%; bottom: 4%;
+      }
+      #tw-question  { font-size: 15px; }
+      .tw-option span { font-size: 11px; }
+      #tw-textarea  { height: 90px; }
+      #tw-bottom    { flex-direction: column; gap: 10px; align-items: stretch; }
+      .btn-next     { width: 100%; justify-content: center; font-size: 9px; }
     }
   </style>
 </head>
+
 <body>
 
-<div id="slides">
+  <!-- VELO NEGRO -->
+  <div id="veil"></div>
 
-  <!-- ── PORTADA ── -->
-  <div class="slide slide-cover active" id="slide-0">
-    <img src="logo-av.png" alt="Arte Visual" class="cover-logo" />
-    <p class="cover-label">Encuesta de satisfacción</p>
-    <h1 class="cover-title">Tu opinión<em>nos importa.</em></h1>
-    <p class="cover-sub">5 preguntas. Menos de 3 minutos.<br>Tu mirada hace la diferencia.</p>
-    <button class="btn-start" onclick="goTo(1)">Comenzar &rarr;</button>
+  <!-- VIDEO ENTRADA -->
+  <div id="cover-video" class="vid-layer">
+    <video id="vid-entrada" muted playsinline>
+      <source src="video_entrada.mp4" type="video/mp4">
+    </video>
   </div>
 
-  <!-- ── PREGUNTA 01 ── -->
-  <div class="slide slide-question" id="slide-1">
-    <div class="progress" style="width:20%"></div>
-    <div class="q-nav">
-      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
-      <span class="q-counter"><strong>01</strong> / 05</span>
-    </div>
-    <div class="q-deco">01</div>
-    <div class="q-content">
-      <span class="q-tag">Pregunta 01</span>
-      <p class="q-text">¿Cómo describirías tu experiencia general con el servicio de gestión de redes sociales?</p>
-      <div class="options">
-        <label class="option">
-          <input type="radio" name="p1" value="Excelente" />
-          <span>Excelente</span>
-        </label>
-        <label class="option">
-          <input type="radio" name="p1" value="Muy buena" />
-          <span>Muy buena</span>
-        </label>
-        <label class="option">
-          <input type="radio" name="p1" value="Satisfactoria" />
-          <span>Satisfactoria</span>
-        </label>
-        <label class="option">
-          <input type="radio" name="p1" value="Deficiente" />
-          <span>Deficiente</span>
-        </label>
+  <!-- VIDEO 2 -->
+  <div id="cover-video2" class="vid-layer">
+    <video id="vid-video2" muted playsinline>
+      <source src="video2.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- CLIP 1 — fondo de preguntas Q1 (y Q3-Q5) -->
+  <div id="cover-clip1" class="vid-layer">
+    <video id="vid-clip1" muted playsinline loop>
+      <source src="clip1.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- CLIP 2 — fondo de pregunta Q2 -->
+  <div id="cover-clip2" class="vid-layer">
+    <video id="vid-clip2" muted playsinline loop>
+      <source src="clip2.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- VIDEO 1: presentación -->
+  <div id="cover1">
+    <video id="vid1" autoplay muted playsinline></video>
+  </div>
+
+  <!-- PANTALLA INTRO -->
+  <div id="intro">
+    <p class="intro-label">Arte Visual</p>
+    <h1 class="intro-title">Encuesta de<em>satisfacción</em></h1>
+    <div class="intro-line"></div>
+    <button class="btn-intro" onclick="startJourney()">Comenzar encuesta &rarr;</button>
+  </div>
+
+  <!-- OVERLAY DE PREGUNTAS (sobre el video) -->
+  <div id="tw-scene">
+    <div id="tw-container">
+      <div id="tw-header">
+        <img src="logo-av.png" alt="Arte Visual" class="tw-logo" />
+        <span id="tw-qnum">01 / 05</span>
       </div>
-      <button class="btn-next" id="btn-1" onclick="nextRadio(1, 'p1')">Siguiente &rarr;</button>
-    </div>
-  </div>
-
-  <!-- ── PREGUNTA 02 ── -->
-  <div class="slide slide-question" id="slide-2">
-    <div class="progress" style="width:40%"></div>
-    <div class="q-nav">
-      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
-      <span class="q-counter"><strong>02</strong> / 05</span>
-    </div>
-    <div class="q-deco">02</div>
-    <div class="q-content">
-      <span class="q-tag">Pregunta 02</span>
-      <p class="q-text">¿Qué es lo que más valorás del trabajo que realizamos en redes?</p>
-      <p class="q-hint">Respuesta libre — escribí lo que quieras</p>
-      <textarea id="p2" placeholder="Contanos con tus palabras..."></textarea>
-      <button class="btn-next" onclick="nextText(2, 'p2')">Siguiente &rarr;</button>
-    </div>
-  </div>
-
-  <!-- ── PREGUNTA 03 ── -->
-  <div class="slide slide-question" id="slide-3">
-    <div class="progress" style="width:60%"></div>
-    <div class="q-nav">
-      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
-      <span class="q-counter"><strong>03</strong> / 05</span>
-    </div>
-    <div class="q-deco">03</div>
-    <div class="q-content">
-      <span class="q-tag">Pregunta 03</span>
-      <p class="q-text">En relación a los procesos de trabajo, ¿cómo te sentís hoy?</p>
-      <div class="options">
-        <label class="option">
-          <input type="radio" name="p3" value="Muy al tanto y conforme" />
-          <span>Muy al tanto y conforme</span>
-        </label>
-        <label class="option">
-          <input type="radio" name="p3" value="Bien, aunque me gustaría entender más el proceso" />
-          <span>Bien, aunque me gustaría entender más el proceso</span>
-        </label>
-        <label class="option">
-          <input type="radio" name="p3" value="Prefiero que esté optimizado sin involucrarme demasiado" />
-          <span>Prefiero que esté optimizado y no involucrarme</span>
-        </label>
-        <label class="option">
-          <input type="radio" name="p3" value="Siento que podría estar mejor informado/a" />
-          <span>Siento que podría estar mejor informado/a</span>
-        </label>
+      <p id="tw-question"></p>
+      <p id="tw-hint"></p>
+      <div id="tw-options"></div>
+      <textarea id="tw-textarea" rows="5"></textarea>
+      <div id="tw-bottom">
+        <span id="tw-pnum">01 / 05</span>
+        <button id="tw-btn-next" class="btn-next">Siguiente &rarr;</button>
       </div>
-      <button class="btn-next" id="btn-3" onclick="nextRadio(3, 'p3')">Siguiente &rarr;</button>
     </div>
   </div>
 
-  <!-- ── PREGUNTA 04 ── -->
-  <div class="slide slide-question" id="slide-4">
-    <div class="progress" style="width:80%"></div>
-    <div class="q-nav">
-      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
-      <span class="q-counter"><strong>04</strong> / 05</span>
-    </div>
-    <div class="q-deco">04</div>
-    <div class="q-content">
-      <span class="q-tag">Pregunta 04</span>
-      <p class="q-text">¿Hay algo del servicio que te gustaría mejorar o ajustar?</p>
-      <p class="q-hint">Respuesta libre — toda devolución es bienvenida</p>
-      <textarea id="p4" placeholder="Tu feedback es muy valioso para nosotros..."></textarea>
-      <button class="btn-next" onclick="nextText(4, 'p4')">Siguiente &rarr;</button>
-    </div>
-  </div>
-
-  <!-- ── PREGUNTA 05 ── -->
-  <div class="slide slide-question" id="slide-5">
-    <div class="progress" style="width:100%"></div>
-    <div class="q-nav">
-      <img src="logo-av.png" alt="Arte Visual" class="q-nav-logo" />
-      <span class="q-counter"><strong>05</strong> / 05</span>
-    </div>
-    <div class="q-deco">05</div>
-    <div class="q-content">
-      <span class="q-tag">Pregunta 05</span>
-      <p class="q-text">Pensando a futuro, ¿qué te gustaría que el servicio de redes te aporte?</p>
-      <p class="q-hint">Respuesta libre — contanos tus expectativas</p>
-      <textarea id="p5" placeholder="¿Qué objetivos o resultados esperás conseguir?"></textarea>
-      <button class="btn-next" id="btn-submit" onclick="submitForm()">Enviar respuestas &rarr;</button>
-    </div>
-  </div>
-
-  <!-- ── ÉXITO ── -->
-  <div class="slide slide-success" id="slide-6">
-    <div class="success-check">
-      <svg viewBox="0 0 34 34" fill="none">
-        <path d="M7 17 L14 24 L27 10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- PANTALLA DE ÉXITO -->
+  <div id="tw-success">
+    <div class="s-check">
+      <svg viewBox="0 0 22 22" fill="none">
+        <path d="M4 11 L9 17 L18 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </div>
-    <p class="success-label">Respuesta enviada</p>
-    <h2 class="success-title">Gracias por<em>tomarte el tiempo.</em></h2>
-    <p class="success-text">
-      Valoramos mucho tu devolución y la vamos a tener en cuenta para seguir ajustando nuestro trabajo y acompañarte cada vez mejor.<br><br>
-      En Arte Visual creemos en los procesos que evolucionan junto a cada cliente.<br><br>
-      Seguimos en contacto.
-    </p>
+    <p class="s-label">Respuesta enviada</p>
+    <h2 class="s-title">Gracias por<em>tomarte el tiempo.</em></h2>
+    <p class="s-text">Valoramos mucho tu devolución y la vamos a tener en cuenta para seguir ajustando nuestro
+      trabajo.<br><br>En Arte Visual creemos en los procesos que evolucionan junto a cada cliente.</p>
   </div>
 
-</div>
+  <script>
+    const WEBHOOK = 'https://3a4d-190-106-84-7.ngrok-free.app/webhook/M4B5DyvY44zTa7aO/webhook/encuesta-artevisual';
 
-<script>
-  const WEBHOOK_URL = 'https://3a4d-190-106-84-7.ngrok-free.app/webhook/M4B5DyvY44zTa7aO/webhook/encuesta-artevisual';
+    /* ── Definición de preguntas ── */
+    const QUESTIONS = [
+      {
+        num: 1,
+        text: '¿Cómo describirías tu experiencia general con el servicio de gestión de redes sociales?',
+        type: 'radio', name: 'p1',
+        options: ['Excelente', 'Muy buena', 'Satisfactoria', 'Deficiente'],
+        layout: 'pos-right-single',   // página derecha, hoja única (clip1)
+        bg: 'clip1'
+      },
+      {
+        num: 2,
+        text: '¿Qué es lo que más valorás del trabajo que realizamos en redes?',
+        type: 'text', field: 'p2',
+        hint: 'Respuesta libre — escribí lo que quieras',
+        placeholder: 'Contanos con tus palabras...',
+        layout: 'pos-left-double',    // hoja izquierda (clip2, 2 páginas)
+        bg: 'clip2'
+      },
+      {
+        num: 3,
+        text: 'En relación a los procesos de trabajo, ¿cómo te sentís hoy?',
+        type: 'radio', name: 'p3',
+        options: [
+          'Muy al tanto y conforme',
+          'Bien, aunque me gustaría entender más el proceso',
+          'Prefiero que esté optimizado y no involucrarme',
+          'Siento que podría estar mejor informado/a'
+        ],
+        layout: 'pos-right-double',   // hoja derecha (clip2, 2 páginas)
+        bg: 'clip2'                   // sigue sobre clip2
+      },
+      {
+        num: 4,
+        text: '¿Hay algo del servicio que te gustaría mejorar o ajustar?',
+        type: 'text', field: 'p4',
+        hint: 'Respuesta libre — toda devolución es bienvenida',
+        placeholder: 'Tu feedback es muy valioso para nosotros...',
+        layout: 'pos-right-double', bg: 'clip2'
+      },
+      {
+        num: 5,
+        text: 'Pensando a futuro, ¿qué te gustaría que el servicio de redes te aporte?',
+        type: 'text', field: 'p5',
+        hint: 'Respuesta libre — contanos tus expectativas',
+        placeholder: '¿Qué objetivos o resultados esperás conseguir?',
+        layout: 'pos-right-double', bg: 'clip2',
+        isLast: true
+      }
+    ];
 
-  let current = 0;
-  const answers = {};
+    const answers = {};
 
-  function goTo(index) {
-    const allSlides = document.querySelectorAll('.slide');
-    allSlides[current].classList.remove('active');
-    allSlides[current].classList.add('prev');
-    allSlides[index].classList.add('active');
-    current = index;
-  }
+    /* ── DOM refs ── */
+    const veil        = document.getElementById('veil');
+    const cover1      = document.getElementById('cover1');
+    const coverVideo  = document.getElementById('cover-video');
+    const coverVideo2 = document.getElementById('cover-video2');
+    const coverClip1  = document.getElementById('cover-clip1');
+    const coverClip2  = document.getElementById('cover-clip2');
+    const intro       = document.getElementById('intro');
+    const vid1        = document.getElementById('vid1');
+    const vidEntrada  = document.getElementById('vid-entrada');
+    const vidVideo2   = document.getElementById('vid-video2');
+    const vidClip1    = document.getElementById('vid-clip1');
+    const vidClip2    = document.getElementById('vid-clip2');
+    const twScene     = document.getElementById('tw-scene');
+    const twContainer = document.getElementById('tw-container');
 
-  function nextRadio(slideNum, name) {
-    const selected = document.querySelector(`input[name="${name}"]:checked`);
-    if (!selected) {
-      const btn = document.getElementById(`btn-${slideNum}`);
-      btn.classList.remove('shake');
-      void btn.offsetWidth;
-      btn.classList.add('shake');
-      return;
+    /* ── Selección de video según dispositivo ── */
+    vid1.src = window.innerWidth <= 660 ? 'video_celular.mp4' : 'video_presentacion.mp4';
+    vid1.style.objectFit = 'cover';
+
+    /* ════════════════════════════════════════════
+       PASO 1 — video1 termina → pantalla intro
+    ════════════════════════════════════════════ */
+    let introShown = false;
+    function showIntro() {
+      if (introShown) return;
+      introShown = true;
+      veil.classList.add('active');
+      setTimeout(() => {
+        cover1.classList.add('gone');
+        veil.classList.remove('active');
+        intro.classList.add('visible');
+      }, 2600);
     }
-    answers[`p${slideNum}`] = selected.value;
-    goTo(slideNum + 1);
-  }
+    vid1.addEventListener('ended', showIntro);
+    vid1.addEventListener('timeupdate', () => {
+      if (vid1.duration && vid1.currentTime >= vid1.duration - 0.15) showIntro();
+    });
 
-  function nextText(slideNum, id) {
-    const val = document.getElementById(id).value;
-    answers[`p${slideNum}`] = val;
-    goTo(slideNum + 1);
-  }
+    /* ════════════════════════════════════════════
+       PASO 2 — click → video_entrada → video2 → clip1 (loop) + Q1 encima
+    ════════════════════════════════════════════ */
+    function startJourney() {
+      intro.classList.remove('visible');
+      intro.classList.add('gone');
+      coverVideo.style.display = 'block';
+      vidEntrada.play();
 
-  async function submitForm() {
-    answers['p5'] = document.getElementById('p5').value;
+      /* video2 termina → fade out → clip1 empieza a loopear → Q1 aparece encima */
+      function onVideo2End() {
+        coverVideo2.classList.add('fade-out');
+        setTimeout(() => {
+          coverVideo2.style.display = 'none';
+          coverVideo2.classList.remove('fade-out');
+          coverVideo.style.display = 'none';
+          coverVideo.classList.remove('fade-out');
 
-    const btn = document.getElementById('btn-submit');
-    btn.textContent = 'Enviando...';
-    btn.disabled = true;
+          /* Iniciar clip1, pausar a los 5s y mostrar Q1 */
+          coverClip1.style.display = 'block';
+          vidClip1.currentTime = 0;
+          vidClip1.play();
 
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(answers)
-      });
-    } catch (err) {
-      console.error(err);
+          function pauseClip1At5() {
+            if (vidClip1.currentTime >= 5) {
+              vidClip1.pause();
+              vidClip1.removeEventListener('timeupdate', pauseClip1At5);
+              showTypewriterQuestion(0);
+            }
+          }
+          vidClip1.addEventListener('timeupdate', pauseClip1At5);
+        }, 900);
+
+        vidVideo2.removeEventListener('ended', onVideo2End);
+        vidVideo2.removeEventListener('timeupdate', onVideo2TU);
+      }
+      function onVideo2TU() {
+        if (vidVideo2.duration && vidVideo2.currentTime >= vidVideo2.duration - 0.15) onVideo2End();
+      }
+
+      function onVideoEntradaTU() {
+        if (vidEntrada.duration && vidEntrada.currentTime >= vidEntrada.duration - 0.8) {
+          if (!coverVideo2.style.display || coverVideo2.style.display === 'none') {
+            coverVideo.classList.add('fade-out');
+            coverVideo2.style.display = 'block';
+            vidVideo2.play();
+            vidVideo2.addEventListener('ended', onVideo2End);
+            vidVideo2.addEventListener('timeupdate', onVideo2TU);
+            vidEntrada.removeEventListener('timeupdate', onVideoEntradaTU);
+          }
+        }
+      }
+      vidEntrada.addEventListener('timeupdate', onVideoEntradaTU);
     }
 
-    goTo(6);
-  }
-</script>
+    /* ════════════════════════════════════════════
+       TYPEWRITER — mostrar pregunta sobre el video activo
+    ════════════════════════════════════════════ */
+    function showTypewriterQuestion(qIdx) {
+      const q       = QUESTIONS[qIdx];
+      const qEl     = document.getElementById('tw-question');
+      const optEl   = document.getElementById('tw-options');
+      const hintEl  = document.getElementById('tw-hint');
+      const taEl    = document.getElementById('tw-textarea');
+      const botEl   = document.getElementById('tw-bottom');
+      const qnumEl  = document.getElementById('tw-qnum');
+      const pnumEl  = document.getElementById('tw-pnum');
+      const btnNext = document.getElementById('tw-btn-next');
 
+      const label = `0${q.num} / 05`;
+      qnumEl.textContent = label;
+      pnumEl.textContent = label;
+      btnNext.textContent = q.isLast ? 'Enviar \u2192' : 'Siguiente \u2192';
+      btnNext.disabled = false;
+      btnNext.classList.remove('shake');
+
+      /* Resetear contenido */
+      qEl.textContent = '';
+      optEl.innerHTML = '';
+      optEl.classList.remove('visible');
+      hintEl.textContent = '';
+      hintEl.classList.remove('visible');
+      taEl.value = '';
+      taEl.classList.remove('visible');
+      taEl.style.display = 'none';
+      botEl.classList.remove('visible');
+
+      /* Aplicar posición según la pregunta
+         En mobile: siempre hoja derecha (el CSS se encarga del posicionamiento) */
+      twContainer.className = '';
+      if (q.layout) twContainer.classList.add(q.layout);
+
+      /* Mostrar overlay sobre el video */
+      twContainer.style.opacity = '';
+      twScene.style.display = 'block';
+      requestAnimationFrame(() => requestAnimationFrame(() => twScene.classList.add('visible')));
+
+      /* Cursor */
+      const cursor = document.createElement('span');
+      cursor.className = 'tw-cursor';
+      qEl.appendChild(cursor);
+
+      /* Typewriter char por char */
+      const chars = Array.from(q.text);
+      let i = 0;
+      function typeNext() {
+        if (i < chars.length) {
+          cursor.before(document.createTextNode(chars[i++]));
+          setTimeout(typeNext, 32);
+        } else {
+          cursor.remove();
+          setTimeout(() => showInputs(q, optEl, hintEl, taEl, botEl), 260);
+        }
+      }
+      typeNext();
+
+      /* Handler del botón */
+      btnNext.onclick = () => {
+        if (q.type === 'radio') {
+          const sel = optEl.querySelector('input:checked');
+          if (!sel) {
+            btnNext.classList.remove('shake');
+            void btnNext.offsetWidth;
+            btnNext.classList.add('shake');
+            return;
+          }
+          answers[q.name] = sel.value;
+        } else {
+          answers[q.field] = taEl.value;
+        }
+        if (q.isLast) { doSubmit(); return; }
+        handleNext(qIdx);
+      };
+    }
+
+    /* ════════════════════════════════════════════
+       TRANSICIONES ENTRE PREGUNTAS
+    ════════════════════════════════════════════ */
+    function handleNext(qIdx) {
+      twScene.classList.remove('visible');
+
+      if (qIdx === 0) {
+        /* Q1 → Q2:
+           Resume clip1 hasta el final → inicia clip2 → pausa a los 3s → Q2 izquierda */
+        setTimeout(() => {
+          vidClip1.loop = false;
+          vidClip1.play();
+
+          function onClip1Done() {
+            vidClip1.removeEventListener('ended', onClip1Done);
+            vidClip1.removeEventListener('timeupdate', clip1TU);
+            /* Crossfade clip1 → clip2 */
+            coverClip1.classList.add('fade-out');
+            coverClip2.style.display = 'block';
+            vidClip2.currentTime = 0;
+            vidClip2.play();
+            setTimeout(() => {
+              coverClip1.style.display = 'none';
+              coverClip1.classList.remove('fade-out');
+            }, 1000);
+            /* Pausar clip2 a los 4s */
+            function clip2PauseAt4() {
+              if (vidClip2.currentTime >= 4) {
+                vidClip2.pause();
+                vidClip2.removeEventListener('timeupdate', clip2PauseAt4);
+                showTypewriterQuestion(1);
+              }
+            }
+            vidClip2.addEventListener('timeupdate', clip2PauseAt4);
+          }
+          function clip1TU() {
+            if (vidClip1.duration && vidClip1.currentTime >= vidClip1.duration - 0.1) onClip1Done();
+          }
+          vidClip1.addEventListener('ended', onClip1Done);
+          vidClip1.addEventListener('timeupdate', clip1TU);
+        }, 400);
+
+      } else if (qIdx === 1) {
+        /* Q2 → Q3: clip2 sigue pausado, sólo cambiar layout a derecha */
+        setTimeout(() => showTypewriterQuestion(2), 400);
+
+      } else if (qIdx === 2) {
+        /* Q3 → Q4:
+           Resume clip2 → pausa a los 7s → Q4 derecha */
+        setTimeout(() => {
+          vidClip2.play();
+          function clip2PauseAt7() {
+            if (vidClip2.currentTime >= 7) {
+              vidClip2.pause();
+              vidClip2.removeEventListener('timeupdate', clip2PauseAt7);
+              showTypewriterQuestion(3);
+            }
+          }
+          vidClip2.addEventListener('timeupdate', clip2PauseAt7);
+        }, 400);
+
+      } else {
+        /* Q4 → Q5: mismo fondo, sólo cambiar layout */
+        setTimeout(() => showTypewriterQuestion(qIdx + 1), 400);
+      }
+    }
+
+    /* ── Mostrar inputs después del texto ── */
+    function showInputs(q, optEl, hintEl, taEl, botEl) {
+      if (q.type === 'radio') {
+        q.options.forEach(opt => {
+          const lbl  = document.createElement('label');
+          lbl.className = 'tw-option';
+          const inp  = document.createElement('input');
+          inp.type   = 'radio'; inp.name = q.name; inp.value = opt;
+          const span = document.createElement('span');
+          span.textContent = opt;
+          lbl.appendChild(inp); lbl.appendChild(span);
+          optEl.appendChild(lbl);
+        });
+        optEl.classList.add('visible');
+      } else {
+        if (q.hint) { hintEl.textContent = q.hint; hintEl.classList.add('visible'); }
+        taEl.placeholder   = q.placeholder || '';
+        taEl.style.display = 'block';
+        requestAnimationFrame(() => taEl.classList.add('visible'));
+      }
+      setTimeout(() => botEl.classList.add('visible'), 100);
+    }
+
+    /* ── Enviar y mostrar éxito ── */
+    async function doSubmit() {
+      const btn = document.getElementById('tw-btn-next');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+      try {
+        await fetch(WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(answers)
+        });
+      } catch (e) { console.error(e); }
+
+      twScene.classList.remove('visible');
+      setTimeout(() => {
+        twScene.style.display = 'none';
+        coverClip1.style.display = 'none';
+        coverClip2.style.display = 'none';
+        const success = document.getElementById('tw-success');
+        success.classList.add('showing');
+        requestAnimationFrame(() => requestAnimationFrame(() => success.classList.add('visible')));
+      }, 700);
+    }
+  </script>
 </body>
+
 </html>
