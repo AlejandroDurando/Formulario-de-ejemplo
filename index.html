@@ -199,13 +199,20 @@
       z-index: 23;
     }
 
-    /* clip1 y clip2 van detrás del overlay de preguntas pero sobre el fondo */
-    #cover-clip1 {
+    /* paginas va detrás del overlay pero sobre el fondo */
+    #cover-paginas {
       z-index: 15;
     }
 
-    #cover-clip2 {
-      z-index: 15;
+    /* Mobile: mover el video a la izquierda para mostrar sólo la página derecha */
+    @media (max-width: 768px) {
+      #cover-paginas video {
+        width: 190%;
+        left: auto;
+        right: 0;
+        object-fit: cover;
+        object-position: right center;
+      }
     }
 
     /* ══════════════════════════════════
@@ -236,7 +243,7 @@
       overflow-y: auto;
     }
 
-    /* ── Q1: página derecha (hoja única, clip1) ── */
+    /* ── Q1: página derecha (hoja única) ── */
     #tw-container.pos-right-single {
       left: 53%;
       right: 22%;
@@ -244,7 +251,7 @@
       bottom: 4%;
     }
 
-    /* ── Q2: página izquierda (doble hoja, clip2) ── */
+    /* ── Q2: página izquierda (doble hoja) ── */
     #tw-container.pos-left-double {
       left: 18%;
       right: 52%;
@@ -252,7 +259,7 @@
       bottom: 4%;
     }
 
-    /* ── Q3/Q4/Q5: página derecha (doble hoja, clip2) ── */
+    /* ── Q3/Q4/Q5: página derecha (doble hoja) ── */
     #tw-container.pos-right-double {
       left: 53%;
       right: 22%;
@@ -260,7 +267,7 @@
       bottom: 4%;
     }
 
-    /* ── Q4, Q5: página derecha (hoja única, clip1) ── */
+    /* ── Q4, Q5: página derecha (hoja única) ── */
     #tw-container.pos-right-single-b {
       left: 53%;
       right: 22%;
@@ -693,18 +700,9 @@
     </video>
   </div>
 
-  <!-- CLIP 1 — fondo de preguntas Q1 (y Q3-Q5) -->
-  <div id="cover-clip1" class="vid-layer">
-    <video id="vid-clip1" muted playsinline loop>
-      <source src="clip1.mp4" type="video/mp4">
-    </video>
-  </div>
-
-  <!-- CLIP 2 — fondo de pregunta Q2 -->
-  <div id="cover-clip2" class="vid-layer">
-    <video id="vid-clip2" muted playsinline loop>
-      <source src="clip2.mp4" type="video/mp4">
-    </video>
+  <!-- PAGINAS (desktop: paginas_desktop.mp4 / mobile: paginas_mobile.mp4) -->
+  <div id="cover-paginas" class="vid-layer">
+    <video id="vid-paginas" muted playsinline></video>
   </div>
 
   <!-- VIDEO 1: presentación -->
@@ -761,8 +759,7 @@
         text: '¿Cómo describirías tu experiencia general con el servicio de gestión de redes sociales?',
         type: 'radio', name: 'p1',
         options: ['Excelente', 'Muy buena', 'Satisfactoria', 'Deficiente'],
-        layout: 'pos-right-single',   // página derecha, hoja única (clip1)
-        bg: 'clip1'
+        layout: 'pos-right-single'
       },
       {
         num: 2,
@@ -770,8 +767,7 @@
         type: 'text', field: 'p2',
         hint: 'Respuesta libre — escribí lo que quieras',
         placeholder: 'Contanos con tus palabras...',
-        layout: 'pos-left-double',    // hoja izquierda (clip2, 2 páginas)
-        bg: 'clip2'
+        layout: 'pos-left-double'
       },
       {
         num: 3,
@@ -783,8 +779,7 @@
           'Prefiero que esté optimizado y no involucrarme',
           'Siento que podría estar mejor informado/a'
         ],
-        layout: 'pos-right-double',   // hoja derecha (clip2, 2 páginas)
-        bg: 'clip2'                   // sigue sobre clip2
+        layout: 'pos-right-double'
       },
       {
         num: 4,
@@ -792,7 +787,7 @@
         type: 'text', field: 'p4',
         hint: 'Respuesta libre — toda devolución es bienvenida',
         placeholder: 'Tu feedback es muy valioso para nosotros...',
-        layout: 'pos-right-double', bg: 'clip2'
+        layout: 'pos-left-double'
       },
       {
         num: 5,
@@ -800,7 +795,7 @@
         type: 'text', field: 'p5',
         hint: 'Respuesta libre — contanos tus expectativas',
         placeholder: '¿Qué objetivos o resultados esperás conseguir?',
-        layout: 'pos-right-double', bg: 'clip2',
+        layout: 'pos-right-double',
         isLast: true
       }
     ];
@@ -808,25 +803,27 @@
     const answers = {};
 
     /* ── DOM refs ── */
-    const veil = document.getElementById('veil');
-    const cover1 = document.getElementById('cover1');
-    const coverVideo = document.getElementById('cover-video');
-    const coverVideo2 = document.getElementById('cover-video2');
-    const coverClip1 = document.getElementById('cover-clip1');
-    const coverClip2 = document.getElementById('cover-clip2');
-    const intro = document.getElementById('intro');
-    const vid1 = document.getElementById('vid1');
-    const vidEntrada = document.getElementById('vid-entrada');
-    const vidVideo2 = document.getElementById('vid-video2');
-    const vidClip1 = document.getElementById('vid-clip1');
-    const vidClip2 = document.getElementById('vid-clip2');
-    const twScene = document.getElementById('tw-scene');
-    const twContainer = document.getElementById('tw-container');
+    const veil         = document.getElementById('veil');
+    const cover1       = document.getElementById('cover1');
+    const coverVideo   = document.getElementById('cover-video');
+    const coverVideo2  = document.getElementById('cover-video2');
+    const coverPaginas = document.getElementById('cover-paginas');
+    const intro        = document.getElementById('intro');
+    const vid1         = document.getElementById('vid1');
+    const vidEntrada   = document.getElementById('vid-entrada');
+    const vidVideo2    = document.getElementById('vid-video2');
+    const vidPaginas   = document.getElementById('vid-paginas');
+    const twScene      = document.getElementById('tw-scene');
+    const twContainer  = document.getElementById('tw-container');
+
+    const isMobile = window.innerWidth <= 768;
 
     /* ── Selección de video según dispositivo ── */
-    vid1.src = window.innerWidth <= 660 ? 'video_celular.mp4' : 'video_presentacion.mp4';
+    vid1.src = isMobile ? 'video_celular.mp4' : 'video_presentacion.mp4';
     vid1.style.objectFit = 'cover';
+    vidPaginas.src = isMobile ? 'paginas_mobile.mp4' : 'paginas_desktop.mp4';
     vid1.load();
+    vidPaginas.load();
 
     /* ════════════════════════════════════════════
        PASO 1 — video1 termina → pantalla intro
@@ -867,41 +864,20 @@
     }, 4000);
 
     /* ════════════════════════════════════════════
-       PASO 2 — click → video_entrada → video2 → clip1 (loop) + Q1 encima
+       PASO 2 — click → video_entrada → video2 → paginas
     ════════════════════════════════════════════ */
     function startJourney() {
-      /* Desbloquear videos haciéndolos visibles por un instante */
-      [coverVideo2, coverClip1, coverClip2].forEach(c => {
-        c.style.display = 'block';
-        c.style.opacity = '0.01';
-      });
-
-      [vidVideo2, vidClip1, vidClip2].forEach(v => {
-        let p = v.play();
-        if (p !== undefined) {
-          p.then(() => {
-            v.pause();
-            v.currentTime = 0;
-          }).catch(() => { });
-        } else {
-          v.pause();
-          v.currentTime = 0;
-        }
-      });
-
-      setTimeout(() => {
-        [coverVideo2, coverClip1, coverClip2].forEach(c => {
-          c.style.display = 'none';
-          c.style.opacity = '';
-        });
-      }, 50);
+      /* Desbloquear video de páginas tocándolo brevemente */
+      coverPaginas.style.display = 'block';
+      coverPaginas.style.opacity = '0.01';
+      vidPaginas.play().then(() => { vidPaginas.pause(); vidPaginas.currentTime = 0; }).catch(() => {});
+      setTimeout(() => { coverPaginas.style.display = 'none'; coverPaginas.style.opacity = ''; }, 80);
 
       intro.classList.remove('visible');
       intro.classList.add('gone');
       coverVideo.style.display = 'block';
-      vidEntrada.play().catch(() => { });
+      vidEntrada.play().catch(() => {});
 
-      /* video2 termina → fade out → clip1 → Q1 */
       function onVideo2End() {
         coverVideo2.classList.add('fade-out');
         setTimeout(() => {
@@ -909,60 +885,70 @@
           coverVideo2.classList.remove('fade-out');
           coverVideo.style.display = 'none';
           coverVideo.classList.remove('fade-out');
-
-          /* Iniciar clip1, pausar a los 5s y mostrar Q1 */
-          coverClip1.style.display = 'block';
-          vidClip1.currentTime = 0;
-          vidClip1.play().catch(() => { });
-
-          function pauseClip1At5() {
-            if (vidClip1.currentTime >= 5) {
-              vidClip1.pause();
-              vidClip1.removeEventListener('timeupdate', pauseClip1At5);
-              showTypewriterQuestion(0);
-            }
-          }
-          vidClip1.addEventListener('timeupdate', pauseClip1At5);
-
-          /* Fallback: si el video no avanza (mobile bloqueado), mostrar Q1 igual */
-          setTimeout(() => {
-            if (vidClip1.paused && vidClip1.currentTime < 1) {
-              vidClip1.removeEventListener('timeupdate', pauseClip1At5);
-              showTypewriterQuestion(0);
-            }
-          }, 2000);
+          startPaginasVideo();
         }, 900);
-
         vidVideo2.removeEventListener('ended', onVideo2End);
         vidVideo2.removeEventListener('timeupdate', onVideo2TU);
       }
       function onVideo2TU() {
         if (vidVideo2.duration && vidVideo2.currentTime >= vidVideo2.duration - 0.15) onVideo2End();
       }
-
       function onVideoEntradaTU() {
         if (vidEntrada.duration && vidEntrada.currentTime >= vidEntrada.duration - 0.8) {
           if (!coverVideo2.style.display || coverVideo2.style.display === 'none') {
             coverVideo.classList.add('fade-out');
             coverVideo2.style.display = 'block';
-            vidVideo2.play().catch(() => { });
+            vidVideo2.play().catch(() => {});
             vidVideo2.addEventListener('ended', onVideo2End);
             vidVideo2.addEventListener('timeupdate', onVideo2TU);
             vidEntrada.removeEventListener('timeupdate', onVideoEntradaTU);
           }
         }
       }
-      /* Fallback: si vidEntrada no avanza en mobile, saltamos directo a video2 */
       setTimeout(() => {
         if (vidEntrada.paused && vidEntrada.currentTime < 0.5) {
           coverVideo.style.display = 'none';
           coverVideo2.style.display = 'block';
-          vidVideo2.play().catch(() => { });
+          vidVideo2.play().catch(() => {});
           vidVideo2.addEventListener('ended', onVideo2End);
           vidVideo2.addEventListener('timeupdate', onVideo2TU);
         }
       }, 2000);
       vidEntrada.addEventListener('timeupdate', onVideoEntradaTU);
+    }
+
+    /* Inicia el video de páginas y pausa en el punto correcto para Q1 */
+    function startPaginasVideo() {
+      coverPaginas.style.display = 'block';
+      vidPaginas.currentTime = 0;
+      if (isMobile) {
+        /* Mobile: play → pausa al segundo 1 → Q1 */
+        vidPaginas.play().catch(() => {});
+        pausePaginasAt(1, () => showTypewriterQuestion(0));
+      } else {
+        /* Desktop: pausa inmediata al inicio → Q1 */
+        vidPaginas.pause();
+        showTypewriterQuestion(0);
+      }
+    }
+
+    /* Helper: pausa vidPaginas cuando alcanza `t` segundos y llama callback */
+    function pausePaginasAt(t, callback) {
+      function onTU() {
+        if (vidPaginas.currentTime >= t) {
+          vidPaginas.pause();
+          vidPaginas.removeEventListener('timeupdate', onTU);
+          callback();
+        }
+      }
+      vidPaginas.addEventListener('timeupdate', onTU);
+      /* Fallback mobile: si no avanza, ejecutar igual */
+      setTimeout(() => {
+        if (vidPaginas.paused && vidPaginas.currentTime < t * 0.5) {
+          vidPaginas.removeEventListener('timeupdate', onTU);
+          callback();
+        }
+      }, Math.max(t * 1000 + 2000, 3000));
     }
 
     /* ════════════════════════════════════════════
@@ -1051,86 +1037,40 @@
     function handleNext(qIdx) {
       twScene.classList.remove('visible');
 
-      if (qIdx === 0) {
-        /* Q1 → Q2:
-           Resume clip1 hasta el final → inicia clip2 → pausa a los 3s → Q2 izquierda */
+      if (isMobile) {
+        /* ── MOBILE: un video continuo, pausa en puntos específicos ──
+           Q1@1s → Q2@4s → Q3@7s → Q4@11s → Q5@15s               */
+        const mobilePauses = [4, 7, 11, 15];
+        const target = mobilePauses[qIdx];
+        if (target === undefined) return;
         setTimeout(() => {
-          vidClip1.loop = false;
-          vidClip1.play().catch(() => { });
-
-          function onClip1Done() {
-            vidClip1.removeEventListener('ended', onClip1Done);
-            vidClip1.removeEventListener('timeupdate', clip1TU);
-            /* Crossfade clip1 → clip2 */
-            coverClip1.classList.add('fade-out');
-            coverClip2.style.display = 'block';
-            vidClip2.currentTime = 0;
-            vidClip2.play().catch(() => { });
-            setTimeout(() => {
-              coverClip1.style.display = 'none';
-              coverClip1.classList.remove('fade-out');
-            }, 1000);
-            /* Pausar clip2 a los 4s */
-            function clip2PauseAt4() {
-              if (vidClip2.currentTime >= 4) {
-                vidClip2.pause();
-                vidClip2.removeEventListener('timeupdate', clip2PauseAt4);
-                showTypewriterQuestion(1);
-              }
-            }
-            vidClip2.addEventListener('timeupdate', clip2PauseAt4);
-            /* Fallback mobile: si clip2 no avanza, mostrar Q2 igual */
-            setTimeout(() => {
-              if (vidClip2.paused && vidClip2.currentTime < 0.5) {
-                vidClip2.removeEventListener('timeupdate', clip2PauseAt4);
-                showTypewriterQuestion(1);
-              }
-            }, 2500);
-          }
-          function clip1TU() {
-            if (vidClip1.duration && vidClip1.currentTime >= vidClip1.duration - 0.1) onClip1Done();
-          }
-          vidClip1.addEventListener('ended', onClip1Done);
-          vidClip1.addEventListener('timeupdate', clip1TU);
-          /* Fallback mobile: si clip1 no avanza, saltar directo */
-          setTimeout(() => {
-            if (vidClip1.paused && vidClip1.currentTime < 0.5) {
-              vidClip1.removeEventListener('ended', onClip1Done);
-              vidClip1.removeEventListener('timeupdate', clip1TU);
-              onClip1Done();
-            }
-          }, 2500);
-        }, 400);
-
-      } else if (qIdx === 1) {
-        /* Q2 → Q3: clip2 sigue pausado, sólo cambiar layout a derecha */
-        setTimeout(() => showTypewriterQuestion(2), 400);
-
-      } else if (qIdx === 2) {
-        /* Q3 → Q4:
-           Resume clip2 → pausa a los 7s → Q4 derecha */
-        setTimeout(() => {
-          vidClip2.play().catch(() => { });
-          function clip2PauseAt7() {
-            if (vidClip2.currentTime >= 7) {
-              vidClip2.pause();
-              vidClip2.removeEventListener('timeupdate', clip2PauseAt7);
-              showTypewriterQuestion(3);
-            }
-          }
-          vidClip2.addEventListener('timeupdate', clip2PauseAt7);
-          /* Fallback mobile */
-          setTimeout(() => {
-            if (vidClip2.paused && vidClip2.currentTime < 0.5) {
-              vidClip2.removeEventListener('timeupdate', clip2PauseAt7);
-              showTypewriterQuestion(3);
-            }
-          }, 2500);
+          vidPaginas.play().catch(() => {});
+          pausePaginasAt(target, () => showTypewriterQuestion(qIdx + 1));
         }, 400);
 
       } else {
-        /* Q4 → Q5: mismo fondo, sólo cambiar layout */
-        setTimeout(() => showTypewriterQuestion(qIdx + 1), 400);
+        /* ── DESKTOP: paginas_desktop.mp4 ──
+           Q1 al inicio (pause) → play → pause@4s → Q2 izq + Q3 der
+           Q3 responde → play → pause@7s → Q4 izq + Q5 der          */
+        if (qIdx === 0) {
+          /* Q1 → play → pause@4s → Q2 izquierda */
+          setTimeout(() => {
+            vidPaginas.play().catch(() => {});
+            pausePaginasAt(4, () => showTypewriterQuestion(1));
+          }, 400);
+        } else if (qIdx === 1) {
+          /* Q2 → Q3 derecha, video sigue pausado */
+          setTimeout(() => showTypewriterQuestion(2), 400);
+        } else if (qIdx === 2) {
+          /* Q3 → play → pause@7s → Q4 izquierda */
+          setTimeout(() => {
+            vidPaginas.play().catch(() => {});
+            pausePaginasAt(7, () => showTypewriterQuestion(3));
+          }, 400);
+        } else if (qIdx === 3) {
+          /* Q4 → Q5 derecha, video sigue pausado */
+          setTimeout(() => showTypewriterQuestion(4), 400);
+        }
       }
     }
 
@@ -1173,8 +1113,7 @@
       twScene.classList.remove('visible');
       setTimeout(() => {
         twScene.style.display = 'none';
-        coverClip1.style.display = 'none';
-        coverClip2.style.display = 'none';
+        coverPaginas.style.display = 'none';
         const success = document.getElementById('tw-success');
         success.classList.add('showing');
         requestAnimationFrame(() => requestAnimationFrame(() => success.classList.add('visible')));
