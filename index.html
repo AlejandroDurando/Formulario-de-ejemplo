@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Encuesta · Arte Visual</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Caveat:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
   <style>
     *,
@@ -199,6 +199,11 @@
       z-index: 23;
     }
 
+    /* clip1: transición de apertura del cuestionario */
+    #cover-clip1 {
+      z-index: 16;
+    }
+
     /* paginas va detrás del overlay pero sobre el fondo */
     #cover-paginas {
       z-index: 15;
@@ -246,7 +251,7 @@
     /* ── Q1: página derecha (hoja única) ── */
     #tw-container.pos-right-single {
       left: 53%;
-      right: 22%;
+      right: 28%;
       top: 18%;
       bottom: 4%;
     }
@@ -254,7 +259,7 @@
     /* ── Q2: página izquierda (doble hoja) ── */
     #tw-container.pos-left-double {
       left: 18%;
-      right: 52%;
+      right: 56%;
       top: 19%;
       bottom: 4%;
     }
@@ -262,7 +267,7 @@
     /* ── Q3/Q4/Q5: página derecha (doble hoja) ── */
     #tw-container.pos-right-double {
       left: 53%;
-      right: 22%;
+      right: 28%;
       top: 18%;
       bottom: 4%;
     }
@@ -270,7 +275,7 @@
     /* ── Q4, Q5: página derecha (hoja única) ── */
     #tw-container.pos-right-single-b {
       left: 53%;
-      right: 22%;
+      right: 28%;
       top: 18%;
       bottom: 4%;
     }
@@ -298,13 +303,14 @@
 
     /* La pregunta — tinta sobre papel */
     #tw-question {
-      font-size: clamp(16px, 2.2vw, 26px);
-      font-weight: 700;
+      font-family: 'Caveat', cursive;
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 600;
       color: #2a2a2a;
-      line-height: 1.38;
+      line-height: 1.35;
       margin-bottom: 24px;
       min-height: 1.5em;
-      opacity: 0.82;
+      opacity: 0.85;
     }
 
     /* Cursor parpadeante rojo */
@@ -586,7 +592,7 @@
       #tw-container.pos-left-double,
       #tw-container.pos-right-double {
         left: 58%;
-        right: 2%;
+        right: 6%;
         top: 18%;
         bottom: 5%;
       }
@@ -649,7 +655,7 @@
       #tw-container.pos-left-double,
       #tw-container.pos-right-double {
         left: 61%;
-        right: 1%;
+        right: 4%;
         top: 16%;
         bottom: 4%;
       }
@@ -697,6 +703,13 @@
   <div id="cover-video2" class="vid-layer">
     <video id="vid-video2" muted playsinline>
       <source src="video2.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- CLIP1: transición de apertura del cuestionario -->
+  <div id="cover-clip1" class="vid-layer">
+    <video id="vid-clip1" muted playsinline>
+      <source src="clip1.mp4" type="video/mp4">
     </video>
   </div>
 
@@ -807,11 +820,13 @@
     const cover1       = document.getElementById('cover1');
     const coverVideo   = document.getElementById('cover-video');
     const coverVideo2  = document.getElementById('cover-video2');
+    const coverClip1   = document.getElementById('cover-clip1');
     const coverPaginas = document.getElementById('cover-paginas');
     const intro        = document.getElementById('intro');
     const vid1         = document.getElementById('vid1');
     const vidEntrada   = document.getElementById('vid-entrada');
     const vidVideo2    = document.getElementById('vid-video2');
+    const vidClip1     = document.getElementById('vid-clip1');
     const vidPaginas   = document.getElementById('vid-paginas');
     const twScene      = document.getElementById('tw-scene');
     const twContainer  = document.getElementById('tw-container');
@@ -885,7 +900,28 @@
           coverVideo2.classList.remove('fade-out');
           coverVideo.style.display = 'none';
           coverVideo.classList.remove('fade-out');
-          startPaginasVideo();
+          /* Play clip1 como transición antes de paginas */
+          coverClip1.style.display = 'block';
+          vidClip1.play().catch(() => {});
+          function onClip1End() {
+            coverClip1.classList.add('fade-out');
+            setTimeout(() => {
+              coverClip1.style.display = 'none';
+              coverClip1.classList.remove('fade-out');
+              startPaginasVideo();
+            }, 900);
+            vidClip1.removeEventListener('ended', onClip1End);
+            vidClip1.removeEventListener('timeupdate', onClip1TU);
+          }
+          function onClip1TU() {
+            if (vidClip1.duration && vidClip1.currentTime >= vidClip1.duration - 0.15) onClip1End();
+          }
+          vidClip1.addEventListener('ended', onClip1End);
+          vidClip1.addEventListener('timeupdate', onClip1TU);
+          /* Fallback por si clip1 no reproduce */
+          setTimeout(() => {
+            if (coverClip1.style.display !== 'none') onClip1End();
+          }, 8000);
         }, 900);
         vidVideo2.removeEventListener('ended', onVideo2End);
         vidVideo2.removeEventListener('timeupdate', onVideo2TU);
@@ -1034,8 +1070,16 @@
     /* ════════════════════════════════════════════
        TRANSICIONES ENTRE PREGUNTAS
     ════════════════════════════════════════════ */
-    function handleNext(qIdx) {
+    /* Fade out del overlay y luego muestra la siguiente pregunta */
+    function transitionToNext(qIdx) {
       twScene.classList.remove('visible');
+      setTimeout(() => showTypewriterQuestion(qIdx), 300);
+    }
+
+    function handleNext(qIdx) {
+      /* La pregunta NO desaparece aquí — se mantiene visible
+         mientras el video gira la página. Solo se oculta cuando
+         la nueva pregunta está lista para aparecer. */
 
       if (isMobile) {
         /* ── MOBILE: un video continuo, pausa en puntos específicos ──
@@ -1043,10 +1087,8 @@
         const mobilePauses = [4, 7, 11, 15];
         const target = mobilePauses[qIdx];
         if (target === undefined) return;
-        setTimeout(() => {
-          vidPaginas.play().catch(() => {});
-          pausePaginasAt(target, () => showTypewriterQuestion(qIdx + 1));
-        }, 400);
+        vidPaginas.play().catch(() => {});
+        pausePaginasAt(target, () => transitionToNext(qIdx + 1));
 
       } else {
         /* ── DESKTOP: paginas_desktop.mp4 ──
@@ -1054,22 +1096,18 @@
            Q3 responde → play → pause@7s → Q4 izq + Q5 der          */
         if (qIdx === 0) {
           /* Q1 → play → pause@4s → Q2 izquierda */
-          setTimeout(() => {
-            vidPaginas.play().catch(() => {});
-            pausePaginasAt(4, () => showTypewriterQuestion(1));
-          }, 400);
+          vidPaginas.play().catch(() => {});
+          pausePaginasAt(4, () => transitionToNext(1));
         } else if (qIdx === 1) {
           /* Q2 → Q3 derecha, video sigue pausado */
-          setTimeout(() => showTypewriterQuestion(2), 400);
+          transitionToNext(2);
         } else if (qIdx === 2) {
           /* Q3 → play → pause@7s → Q4 izquierda */
-          setTimeout(() => {
-            vidPaginas.play().catch(() => {});
-            pausePaginasAt(7, () => showTypewriterQuestion(3));
-          }, 400);
+          vidPaginas.play().catch(() => {});
+          pausePaginasAt(7, () => transitionToNext(3));
         } else if (qIdx === 3) {
           /* Q4 → Q5 derecha, video sigue pausado */
-          setTimeout(() => showTypewriterQuestion(4), 400);
+          transitionToNext(4);
         }
       }
     }
