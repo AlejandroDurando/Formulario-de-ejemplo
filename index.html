@@ -446,6 +446,12 @@
       if (vid1.duration && vid1.currentTime >= vid1.duration - 0.15) showIntro();
     });
 
+    /* En mobile el autoplay puede fallar: si en 1.5s el video no arrancó, mostramos intro */
+    vid1.play().catch(() => {});
+    setTimeout(() => {
+      if (!introShown && (vid1.paused || vid1.currentTime === 0)) showIntro();
+    }, 1500);
+
     /* ════════════════════════════════════════════
        PASO 2 — click → video_entrada → video2 → clip1 (loop) + Q1 encima
     ════════════════════════════════════════════ */
@@ -453,9 +459,9 @@
       intro.classList.remove('visible');
       intro.classList.add('gone');
       coverVideo.style.display = 'block';
-      vidEntrada.play();
+      vidEntrada.play().catch(() => {});
 
-      /* video2 termina → fade out → clip1 empieza a loopear → Q1 aparece encima */
+      /* video2 termina → fade out → clip1 → Q1 */
       function onVideo2End() {
         coverVideo2.classList.add('fade-out');
         setTimeout(() => {
@@ -467,7 +473,7 @@
           /* Iniciar clip1, pausar a los 5s y mostrar Q1 */
           coverClip1.style.display = 'block';
           vidClip1.currentTime = 0;
-          vidClip1.play();
+          vidClip1.play().catch(() => {});
 
           function pauseClip1At5() {
             if (vidClip1.currentTime >= 5) {
@@ -477,6 +483,14 @@
             }
           }
           vidClip1.addEventListener('timeupdate', pauseClip1At5);
+
+          /* Fallback: si el video no avanza (mobile bloqueado), mostrar Q1 igual */
+          setTimeout(() => {
+            if (vidClip1.paused && vidClip1.currentTime < 1) {
+              vidClip1.removeEventListener('timeupdate', pauseClip1At5);
+              showTypewriterQuestion(0);
+            }
+          }, 2000);
         }, 900);
 
         vidVideo2.removeEventListener('ended', onVideo2End);
@@ -491,13 +505,23 @@
           if (!coverVideo2.style.display || coverVideo2.style.display === 'none') {
             coverVideo.classList.add('fade-out');
             coverVideo2.style.display = 'block';
-            vidVideo2.play();
+            vidVideo2.play().catch(() => {});
             vidVideo2.addEventListener('ended', onVideo2End);
             vidVideo2.addEventListener('timeupdate', onVideo2TU);
             vidEntrada.removeEventListener('timeupdate', onVideoEntradaTU);
           }
         }
       }
+      /* Fallback: si vidEntrada no avanza en mobile, saltamos directo a video2 */
+      setTimeout(() => {
+        if (vidEntrada.paused && vidEntrada.currentTime < 0.5) {
+          coverVideo.style.display = 'none';
+          coverVideo2.style.display = 'block';
+          vidVideo2.play().catch(() => {});
+          vidVideo2.addEventListener('ended', onVideo2End);
+          vidVideo2.addEventListener('timeupdate', onVideo2TU);
+        }
+      }, 2000);
       vidEntrada.addEventListener('timeupdate', onVideoEntradaTU);
     }
 
@@ -592,7 +616,7 @@
            Resume clip1 hasta el final → inicia clip2 → pausa a los 3s → Q2 izquierda */
         setTimeout(() => {
           vidClip1.loop = false;
-          vidClip1.play();
+          vidClip1.play().catch(() => {});
 
           function onClip1Done() {
             vidClip1.removeEventListener('ended', onClip1Done);
@@ -601,7 +625,7 @@
             coverClip1.classList.add('fade-out');
             coverClip2.style.display = 'block';
             vidClip2.currentTime = 0;
-            vidClip2.play();
+            vidClip2.play().catch(() => {});
             setTimeout(() => {
               coverClip1.style.display = 'none';
               coverClip1.classList.remove('fade-out');
@@ -615,12 +639,27 @@
               }
             }
             vidClip2.addEventListener('timeupdate', clip2PauseAt4);
+            /* Fallback mobile: si clip2 no avanza, mostrar Q2 igual */
+            setTimeout(() => {
+              if (vidClip2.paused && vidClip2.currentTime < 0.5) {
+                vidClip2.removeEventListener('timeupdate', clip2PauseAt4);
+                showTypewriterQuestion(1);
+              }
+            }, 2500);
           }
           function clip1TU() {
             if (vidClip1.duration && vidClip1.currentTime >= vidClip1.duration - 0.1) onClip1Done();
           }
           vidClip1.addEventListener('ended', onClip1Done);
           vidClip1.addEventListener('timeupdate', clip1TU);
+          /* Fallback mobile: si clip1 no avanza, saltar directo */
+          setTimeout(() => {
+            if (vidClip1.paused && vidClip1.currentTime < 0.5) {
+              vidClip1.removeEventListener('ended', onClip1Done);
+              vidClip1.removeEventListener('timeupdate', clip1TU);
+              onClip1Done();
+            }
+          }, 2500);
         }, 400);
 
       } else if (qIdx === 1) {
@@ -631,7 +670,7 @@
         /* Q3 → Q4:
            Resume clip2 → pausa a los 7s → Q4 derecha */
         setTimeout(() => {
-          vidClip2.play();
+          vidClip2.play().catch(() => {});
           function clip2PauseAt7() {
             if (vidClip2.currentTime >= 7) {
               vidClip2.pause();
@@ -640,6 +679,13 @@
             }
           }
           vidClip2.addEventListener('timeupdate', clip2PauseAt7);
+          /* Fallback mobile */
+          setTimeout(() => {
+            if (vidClip2.paused && vidClip2.currentTime < 0.5) {
+              vidClip2.removeEventListener('timeupdate', clip2PauseAt7);
+              showTypewriterQuestion(3);
+            }
+          }, 2500);
         }, 400);
 
       } else {
