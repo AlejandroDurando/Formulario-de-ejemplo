@@ -578,8 +578,8 @@
       #tw-container.pos-right-single-b,
       #tw-container.pos-left-double,
       #tw-container.pos-right-double {
-        left: 52%;
-        right: 5%;
+        left: 58%;
+        right: 2%;
         top: 18%;
         bottom: 5%;
       }
@@ -641,8 +641,8 @@
       #tw-container.pos-right-single-b,
       #tw-container.pos-left-double,
       #tw-container.pos-right-double {
-        left: 54%;
-        right: 4%;
+        left: 61%;
+        right: 1%;
         top: 16%;
         bottom: 4%;
       }
@@ -826,6 +826,7 @@
     /* ── Selección de video según dispositivo ── */
     vid1.src = window.innerWidth <= 660 ? 'video_celular.mp4' : 'video_presentacion.mp4';
     vid1.style.objectFit = 'cover';
+    vid1.load();
 
     /* ════════════════════════════════════════════
        PASO 1 — video1 termina → pantalla intro
@@ -846,10 +847,23 @@
       if (vid1.duration && vid1.currentTime >= vid1.duration - 0.15) showIntro();
     });
 
+    /* Intentar reproducir video1. Si falla, esperamos 4s y saltamos a intro. */
+    const playVid1 = () => {
+      vid1.play().then(() => {
+        // Reproducción iniciada con éxito
+      }).catch((e) => {
+        console.log("Autoplay vid1 bloqueado, esperando interacción o timeout", e);
+      });
+    };
+
+    // Pequeño delay de carga inicial
+    setTimeout(playVid1, 200);
+
     /* En mobile el autoplay puede fallar: dar más tiempo (4000ms) para que cargue */
-    vid1.play().catch(() => { });
     setTimeout(() => {
-      if (!introShown && (vid1.paused || vid1.currentTime === 0)) showIntro();
+      if (!introShown && (vid1.paused || vid1.currentTime === 0)) {
+        showIntro();
+      }
     }, 4000);
 
     /* ════════════════════════════════════════════
